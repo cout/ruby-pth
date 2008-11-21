@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'ffi'
 
-
 module Pth
   def self.silent
     orig_verbose = $VERBOSE
