@@ -584,5 +584,8 @@ END_DECLARATION
     (   pth_event_status(ev) == PTH_STATUS_OCCURRED \
      || pth_event_status(ev) == PTH_STATUS_FAILED   )
 
+    /* callbacks */
+extern void (*pth_thread_switch_event)(pth_t);
+
 #endif /* _PTH_H_ */
 

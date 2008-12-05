@@ -47,6 +47,8 @@ static sigset_t     pth_sigraised;  /* mask of raised signals                */
 static pth_time_t   pth_loadticknext;
 static pth_time_t   pth_loadtickgap = PTH_TIME(1,0);
 
+void (*pth_thread_switch_event)(pth_t) = NULL;
+
 /* initialize the scheduler ingredients */
 intern int pth_scheduler_init(void)
 {
@@ -248,6 +250,10 @@ intern void *pth_scheduler(void *dummy)
 
         /* ** ENTERING THREAD ** - by switching the machine context */
         pth_current->dispatches++;
+        if(pth_thread_switch_event)
+        {
+          pth_thread_switch_event(pth_current);
+        }
         pth_mctx_switch(&pth_sched->mctx, &pth_current->mctx);
 
         /* update scheduler times */
