@@ -33,7 +33,7 @@ class TestPth < Test::Unit::TestCase
     assert run
   end
 
-  def disabled__test_gc_in_thread
+  def test_gc_in_thread
     attr = Pth.pth_attr_new
     th = Pth.pth_spawn(attr, 0) { GC.start }
   end
