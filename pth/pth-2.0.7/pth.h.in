@@ -586,6 +586,7 @@ END_DECLARATION
 
     /* callbacks */
 extern void (*pth_thread_switch_event)(pth_t);
+void set_pth_thread_switch_event(void (*func)(pth_t));
 
 #endif /* _PTH_H_ */
 

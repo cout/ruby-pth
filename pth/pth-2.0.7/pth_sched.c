@@ -49,6 +49,11 @@ static pth_time_t   pth_loadtickgap = PTH_TIME(1,0);
 
 void (*pth_thread_switch_event)(pth_t) = NULL;
 
+void set_pth_thread_switch_event(void (*func)(pth_t))
+{
+  pth_thread_switch_event = func;
+}
+
 /* initialize the scheduler ingredients */
 intern int pth_scheduler_init(void)
 {
