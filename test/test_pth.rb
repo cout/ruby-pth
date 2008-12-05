@@ -16,26 +16,30 @@ class TestPth < Test::Unit::TestCase
 
   def test_spawn
     attr = Pth.pth_attr_new
-    th = Pth.pth_spawn(attr, 0) { }
+    th = Pth.maybe_switch_threads(:pth_spawn, attr, 0) { }
   end
 
   def test_join
     attr = Pth.pth_attr_new
-    th = Pth.pth_spawn(attr, 0) { }
-    Pth.pth_join(th, 0)
+    th = Pth.maybe_switch_threads(:pth_spawn, attr, 0) { }
+    Pth.maybe_switch_threads(:pth_join, th, 0)
   end
 
   def disabled__test_local_variable_set_in_thread
     attr = Pth.pth_attr_new
     run = false
-    th = Pth.pth_spawn(attr, 0) { run = true }
-    Pth.pth_join(th, 0)
+    th = Pth.maybe_switch_threads(:pth_spawn, attr, 0) { run = true }
+    Pth.maybe_switch_threads(:pth_join, th, 0)
     assert run
   end
 
-  def disabled__test_gc_in_thread
+  def test_gc_in_thread
     attr = Pth.pth_attr_new
-    th = Pth.pth_spawn(attr, 0) { GC.start }
+    p RubyStack.stack_start_address
+    th = Pth.maybe_switch_threads(:pth_spawn, attr, 0) {
+      p RubyStack.stack_start_address
+      GC.start
+    }
   end
 end
 

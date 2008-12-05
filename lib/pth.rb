@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'ffi'
+require 'ruby_stack'
 
 module Pth
   def self.silent
@@ -37,6 +38,36 @@ module Pth
   attach_function :pth_join, [ :pth_t, :pointer ], :int
 
   attach_function :pth_exit, [ :pth_t ], :int
+
+  def self.maybe_switch_threads(m, *args, &block)
+    GC.disable
+    orig_self = Pth.pth_self
+    set_trace_func proc { |*x|
+      begin
+        if orig_self.address != Pth.pth_self.address then
+          # We switched threads; fix the stack and return to normal
+          # execution
+          RubyStack.set_stack_start_address()
+          set_trace_func nil
+          GC.enable
+        end
+      rescue Exception
+        p $!
+      end
+    }
+    begin
+      if block then
+        block = proc { block.call(); GC.disable }
+      end
+      return Pth.send(m, *args, &block)
+    ensure
+      # Nope, we didn't switch threads; turn the GC back on, but fix the
+      # stack just in case we switched when the method returned
+      RubyStack.set_stack_start_address()
+      set_trace_func nil
+      GC.enable
+    end
+  end
 end
 
 if __FILE__ == $0 then
@@ -47,6 +78,8 @@ if __FILE__ == $0 then
     p arg
   end
   puts "join:"
-  p Pth.pth_join(th, 0)
+  # p Pth.pth_join(th, 0)
+  p Pth.maybe_switch_threads(:pth_self)
+  p Pth.maybe_switch_threads(:pth_join, th, 0)
 end
 
